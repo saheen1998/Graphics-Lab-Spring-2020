@@ -192,7 +192,7 @@ public class UI_Controller : MonoBehaviour
         RenderTexture.active = snapCam.targetTexture;
         snapshot.ReadPixels(new Rect(0,0,1024,768), 0, 0);
         byte[] bytes = snapshot.EncodeToPNG();
-        System.IO.File.WriteAllBytes(Application.dataPath + "/Snapshot" + System.DateTime.Now.ToString("yy-MM-dd_HH-mm-ss") + ".png", bytes);
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Snapshot " + System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".png", bytes);
         Debug.Log(Application.dataPath);
     }
 

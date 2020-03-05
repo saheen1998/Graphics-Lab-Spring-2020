@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Func : MonoBehaviour {
 
@@ -20,8 +21,19 @@ public class Func : MonoBehaviour {
         return diff;
     }
 
+	//Median
+	public static double Median(List<double> arr, int start, int end) {
+		
+		double sum = 0;
+		
+		for(int i = start; i < end; i++)
+			sum += arr[i];
+
+		return sum/(end-start);
+	}
+
 	//Dot Product of 2 matrices
-	public static double DotProduct(double[,] m1, double[,] m2) {
+	public static double DotProductMat(double[,] m1, double[,] m2) {
 		double dot = 0;
 		for(int i = 0; i<3; i++)
 			for(int j = 0; j<3 ; j++)

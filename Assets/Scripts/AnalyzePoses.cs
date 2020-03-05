@@ -14,7 +14,7 @@ public class AnalyzePoses : MonoBehaviour
         scores.Clear();
         scores.Add(0);
 
-        for(int i = 500; i < endEff.Count; i++) {
+        for(int i = 10; i < endEff.Count; i++) {
             CalculateScore(endEff[i], i);
         }
 
@@ -29,19 +29,16 @@ public class AnalyzePoses : MonoBehaviour
         float vy = endEff[i-2].y - point.y;
         float vz = endEff[i-2].z - point.z;
 
-        float diff = Vector3.Dot(new Vector3(vx, vy, vz).normalized, prevDir.normalized);
-        if(diff < 0.9)
-            diff = 0;
-        Debug.Log("diff = " + diff);
+        float sameDir = Vector3.Dot(new Vector3(vx, vy, vz).normalized, prevDir.normalized);
 
 
-        prevDir.x = endEff[i-500].x - endEff[i-498].x;
-        prevDir.y = endEff[i-500].y - endEff[i-498].y;
-        prevDir.z = endEff[i-500].z - endEff[i-498].z;
+        prevDir.x = endEff[i-10].x - endEff[i-9].x;
+        prevDir.y = endEff[i-10].y - endEff[i-9].y;
+        prevDir.z = endEff[i-10].z - endEff[i-9].z;
 
-        double currScore = distance*10000 + movingSlow - diff*10;
+        double currScore = distance*10000 + movingSlow - sameDir*10;
 
-        Debug.Log(currScore);
+        //Debug.Log(currScore);
         scores.Add(currScore);
     }
 }

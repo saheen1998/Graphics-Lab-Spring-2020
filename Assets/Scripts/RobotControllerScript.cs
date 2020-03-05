@@ -69,6 +69,9 @@ public class RobotControllerScript : MonoBehaviour
     private float pAng = 0;
     public static List<GameObject> dupGrippers = new List<GameObject>();
     public GameObject positionText;
+    private List<Vector3> endEffPos = new List<Vector3>();
+    private AnalyzePoses AnalyzePosesScr;
+    private List<double> poseScores;
 
     void AddAnim(string rPath, Transform arm, List<double> d, ref AnimationClip clip)
     {
@@ -195,10 +198,13 @@ public class RobotControllerScript : MonoBehaviour
 
             List<float> ang = new List<float>(){ (float)d0[i], (float)d1[i], (float)d2[i], (float)d3[i], (float)d4[i], (float)d5[i], (float)d6[i]};
 			line.SetPosition(line.positionCount++, FKscr.GetPoint(ang));
+            endEffPos.Add(FKscr.GetPoint(ang));
 
             i++;
 			data = joint_data.ReadLine();
 		}while(data != null);
+
+        poseScores = AnalyzePosesScr.CheckPoses(endEffPos);
 
         AddAnimBase("base/L0", L0, d0, ref clip);
         AddAnim("base/L0/L1", L1, d1, ref clip);
@@ -209,13 +215,26 @@ public class RobotControllerScript : MonoBehaviour
         AddAnim("base/L0/L1/Body/L2/Body/L3/Body/L4/Body/L5/Body/L6", L6, d6, ref clip);
 
         anim.AddClip(clip, "regular");
-        anim.AddClip(dabClip, "dab");
+    }
+
+    public void ShowScores() {
+
+        int winSize = 51;
+        int hSize = winSize/2;
+        List<double> tempScores = new List<double>(poseScores);
+        for(int i = hSize; i < tempScores.Count-hSize; i++){
+            poseScores[i] = Func.Median(tempScores, i-hSize, i+hSize);
+        }
+
+        gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
+        MakeGrippers();
     }
 
     void Start(){
         gripper = GameObject.Find("Gripper");
         FKscr = gameObject.GetComponent<ForwardKinematics>();
         rend = gameObject.GetComponent<Renderer>();
+        AnalyzePosesScr = gameObject.GetComponent<AnalyzePoses>();
     }
 
     void Update()
@@ -249,11 +268,12 @@ public class RobotControllerScript : MonoBehaviour
         //Time
         try{
             if(anim.IsPlaying("regular")){
-                ExtractPose();
+                //ExtractPose();
+                gameObject.GetComponent<GraphScript>().UpdateCurrentState(anim["regular"].normalizedTime);
             }
         }catch{}
     }
-
+/*
     private void ExtractPose(){
         
         //Time
@@ -285,7 +305,7 @@ public class RobotControllerScript : MonoBehaviour
             poseTimes.Add(anim["regular"].normalizedTime);
             DuplicateGripper();
         }
-    }
+    }*/
     
     public void DuplicateGripper(){
         GameObject dGrip = Instantiate(gripperModel, gripper.transform.position, gripper.transform.rotation);
@@ -295,6 +315,35 @@ public class RobotControllerScript : MonoBehaviour
         GameObject pText = Instantiate(positionText, tipTranform.transform.position, Quaternion.identity);
         pText.GetComponent<TextMesh>().text = (posePts.Count - 1).ToString();
         pText.transform.SetParent(dGrip.transform);
+    }
+
+    public void MakeGrippers(){
+
+        int count = 0;
+        int winSize = 101;
+        
+        for(int i = winSize/2; i < poseScores.Count-winSize/2; i++) {
+            int flag = 1;
+            if(poseScores[i] < 0)
+                continue;
+            for(int j = i-winSize/2; j < i+winSize/2; j++)
+                if(poseScores[i] < poseScores[j]){
+                    flag = 0;
+                    break;
+                }
+            if(flag == 1){
+                count++;
+                Debug.Log((i/(float)poseScores.Count) + " : " + poseScores[i]);
+                Instantiate(gripperModel, endEffPos[i], Quaternion.identity);
+                gameObject.GetComponent<GraphScript>().PlotLine(i);
+            }
+        }
+
+        Debug.Log("Number of candidate poses: " + count);
+        
+        /*GameObject pText = Instantiate(positionText, pos, Quaternion.identity);
+        pText.GetComponent<TextMesh>().text = (posePts.Count - 1).ToString();
+        pText.transform.SetParent(dGrip.transform);*/
     }
 
     public void BrowseTimestampFile(){

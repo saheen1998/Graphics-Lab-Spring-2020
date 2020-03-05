@@ -45,7 +45,6 @@ GameObject:
   - component: {fileID: 3445386329054110545}
   - component: {fileID: 8295583664930282179}
   - component: {fileID: 2020797717239722858}
-  - component: {fileID: 8974341841512494607}
   m_Layer: 0
   m_Name: Prefab Gripper
   m_TagString: DupGrip
@@ -99,18 +98,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.048355833, y: 0.15850236, z: 0.13088633}
   m_Center: {x: 0, y: 0, z: 0.09399477}
---- !u!114 &8974341841512494607
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1961659258179075626}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a2aad21c35a71045925e7ff5c0a7476, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!54 &2937237611837951514
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -138,7 +125,7 @@ HingeJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.00000006332995, y: 0.05500011, z: 0.035000097}
+  m_ConnectedAnchor: {x: -0.00000006705525, y: 0.055000078, z: 0.035000086}
   m_UseSpring: 0
   m_Spring:
     spring: 0
@@ -189,7 +176,7 @@ HingeJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.00000005960466, y: 0.031000149, z: -0.003999971}
+  m_ConnectedAnchor: {x: 0.00000005960466, y: 0.031000149, z: -0.003999941}
   m_UseSpring: 0
   m_Spring:
     spring: 0
@@ -240,7 +227,7 @@ HingeJoint:
   m_Anchor: {x: 0, y: 0.004, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.00000011920932, y: 0.0082001835, z: 0.04880017}
+  m_ConnectedAnchor: {x: -0.00000011920932, y: 0.0082001835, z: 0.04880012}
   m_UseSpring: 0
   m_Spring:
     spring: 0
@@ -307,7 +294,7 @@ HingeJoint:
   m_Anchor: {x: 0, y: 0.004, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.00000011920932, y: 0.0082001835, z: 0.04880017}
+  m_ConnectedAnchor: {x: 0.00000011920932, y: 0.0082001835, z: 0.04880012}
   m_UseSpring: 0
   m_Spring:
     spring: 0
@@ -450,7 +437,7 @@ HingeJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.00000005960466, y: 0.031000149, z: -0.003999971}
+  m_ConnectedAnchor: {x: -0.00000005960466, y: 0.031000149, z: -0.003999941}
   m_UseSpring: 0
   m_Spring:
     spring: 0
@@ -501,7 +488,7 @@ HingeJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.00000006332995, y: 0.055000104, z: -0.035000112}
+  m_ConnectedAnchor: {x: -0.00000006705525, y: 0.05500007, z: -0.0350001}
   m_UseSpring: 0
   m_Spring:
     spring: 0
@@ -680,15 +667,15 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 8230b54fba92b1e45824eaa5381022e0, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9db533964b17fe4abf272c71962a3b5, type: 3}
---- !u!1 &9078866958838551827 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: d9db533964b17fe4abf272c71962a3b5,
-    type: 3}
-  m_PrefabInstance: {fileID: 1071698878825565210}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5450979241154619136 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: d9db533964b17fe4abf272c71962a3b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 1071698878825565210}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &9078866958838551827 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: d9db533964b17fe4abf272c71962a3b5,
     type: 3}
   m_PrefabInstance: {fileID: 1071698878825565210}
   m_PrefabAsset: {fileID: 0}
@@ -1152,15 +1139,15 @@ PrefabInstance:
         type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b128d33fedcd4ad4db47fc7e4ab91e80, type: 3}
---- !u!1 &3916227075622080134 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: b128d33fedcd4ad4db47fc7e4ab91e80,
-    type: 3}
-  m_PrefabInstance: {fileID: 5005987178291386255}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &670832446569621 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: b128d33fedcd4ad4db47fc7e4ab91e80,
+    type: 3}
+  m_PrefabInstance: {fileID: 5005987178291386255}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3916227075622080134 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: b128d33fedcd4ad4db47fc7e4ab91e80,
     type: 3}
   m_PrefabInstance: {fileID: 5005987178291386255}
   m_PrefabAsset: {fileID: 0}
@@ -1393,15 +1380,15 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 8230b54fba92b1e45824eaa5381022e0, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9db533964b17fe4abf272c71962a3b5, type: 3}
---- !u!1 &2974129730821239935 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: d9db533964b17fe4abf272c71962a3b5,
-    type: 3}
-  m_PrefabInstance: {fileID: 6514410878661062006}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2242056918309914220 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: d9db533964b17fe4abf272c71962a3b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 6514410878661062006}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2974129730821239935 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: d9db533964b17fe4abf272c71962a3b5,
     type: 3}
   m_PrefabInstance: {fileID: 6514410878661062006}
   m_PrefabAsset: {fileID: 0}

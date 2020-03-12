@@ -204,7 +204,6 @@ public class RobotControllerScript : MonoBehaviour
 			data = joint_data.ReadLine();
 		}while(data != null);
 
-        poseScores = AnalyzePosesScr.CheckPoses(endEffPos);
 
         AddAnimBase("base/L0", L0, d0, ref clip);
         AddAnim("base/L0/L1", L1, d1, ref clip);
@@ -219,6 +218,8 @@ public class RobotControllerScript : MonoBehaviour
 
     public void ShowScores() {
 
+        poseScores = AnalyzePosesScr.CheckPoses(endEffPos);
+
         int winSize = 51;
         int hSize = winSize/2;
         List<double> tempScores = new List<double>(poseScores);
@@ -228,6 +229,22 @@ public class RobotControllerScript : MonoBehaviour
 
         gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
         MakeGrippers();
+    }
+
+    public void ConstantTimeIntPoses() {
+        
+        poseScores = AnalyzePosesScr.ExtractPoseTimeInt(endEffPos);
+
+        gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
+        MakeGrippersForInt();
+    }
+
+    public void ConstantDistIntPoses() {
+        
+        poseScores = AnalyzePosesScr.ExtractPoseDistInt(endEffPos);
+
+        gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
+        MakeGrippersForInt();
     }
 
     void Start(){
@@ -241,7 +258,8 @@ public class RobotControllerScript : MonoBehaviour
     {
 
         //Descriptor
-        try{if(anim["regular"].normalizedTime > tSafeComplReplay2){
+        try{
+            if(anim["regular"].normalizedTime > tSafeComplReplay2){
                 textDesc.text = "Safe Compliant replay 2";
                 if(rend.material != mat_normal) rend.material = mat_normal;
                 gripper.GetComponent<GripperScript>().Open();
@@ -324,8 +342,8 @@ public class RobotControllerScript : MonoBehaviour
         
         for(int i = winSize/2; i < poseScores.Count-winSize/2; i++) {
             int flag = 1;
-            if(poseScores[i] < 0)
-                continue;
+            /*if(poseScores[i] < 0)
+                continue;*/
             for(int j = i-winSize/2; j < i+winSize/2; j++)
                 if(poseScores[i] < poseScores[j]){
                     flag = 0;
@@ -333,8 +351,29 @@ public class RobotControllerScript : MonoBehaviour
                 }
             if(flag == 1){
                 count++;
-                Debug.Log((i/(float)poseScores.Count) + " : " + poseScores[i]);
-                Instantiate(gripperModel, endEffPos[i], Quaternion.identity);
+                //Debug.Log((i/(float)poseScores.Count) + " : " + poseScores[i]);
+                GameObject dGrip = Instantiate(gripperModel, endEffPos[i], Quaternion.identity);
+                dupGrippers.Add(dGrip);
+                gameObject.GetComponent<GraphScript>().PlotLine(i);
+            }
+        }
+
+        Debug.Log("Number of candidate poses: " + count);
+        
+        /*GameObject pText = Instantiate(positionText, pos, Quaternion.identity);
+        pText.GetComponent<TextMesh>().text = (posePts.Count - 1).ToString();
+        pText.transform.SetParent(dGrip.transform);*/
+    }
+
+    
+    public void MakeGrippersForInt(){
+
+        int count = 0;
+        
+        for(int i = 0; i < poseScores.Count; i++) {
+            if(poseScores[i] == 10) {
+                GameObject dGrip = Instantiate(gripperModel, endEffPos[i], Quaternion.identity);
+                dupGrippers.Add(dGrip);
                 gameObject.GetComponent<GraphScript>().PlotLine(i);
             }
         }

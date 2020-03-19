@@ -59,6 +59,8 @@ public class RobotControllerScript : MonoBehaviour
     private LineRenderer line;
     private Renderer rend;
 
+    private List<double> forcesD = new List<double>();
+
     //Pose extraction
     public float distanceWeight;
     public float timeWeight;
@@ -70,6 +72,7 @@ public class RobotControllerScript : MonoBehaviour
     public static List<GameObject> dupGrippers = new List<GameObject>();
     public GameObject positionText;
     private List<Vector3> endEffPos = new List<Vector3>();
+    private List<Quaternion> endEffRot = new List<Quaternion>();
     private AnalyzePoses AnalyzePosesScr;
     private List<double> poseScores;
 
@@ -197,8 +200,10 @@ public class RobotControllerScript : MonoBehaviour
             d6.Add(double.Parse(jointData[6]));
 
             List<float> ang = new List<float>(){ (float)d0[i], (float)d1[i], (float)d2[i], (float)d3[i], (float)d4[i], (float)d5[i], (float)d6[i]};
-			line.SetPosition(line.positionCount++, FKscr.GetPoint(ang));
-            endEffPos.Add(FKscr.GetPoint(ang));
+            FKscr.ModifyPos(ang);
+			line.SetPosition(line.positionCount++, FKscr.GetPoint());
+            endEffPos.Add(FKscr.GetPoint());
+            endEffRot.Add(FKscr.GetRotation());
 
             i++;
 			data = joint_data.ReadLine();
@@ -218,7 +223,7 @@ public class RobotControllerScript : MonoBehaviour
 
     public void ShowScores() {
 
-        poseScores = AnalyzePosesScr.CheckPoses(endEffPos);
+        poseScores = AnalyzePosesScr.CheckPoses(endEffPos, forcesD);
 
         int winSize = 51;
         int hSize = winSize/2;
@@ -352,7 +357,8 @@ public class RobotControllerScript : MonoBehaviour
             if(flag == 1){
                 count++;
                 //Debug.Log((i/(float)poseScores.Count) + " : " + poseScores[i]);
-                GameObject dGrip = Instantiate(gripperModel, endEffPos[i], Quaternion.identity);
+                GameObject dGrip = Instantiate(gripperModel, endEffPos[i], endEffRot[i]);
+                dGrip.transform.Rotate(0,90,90);
                 dupGrippers.Add(dGrip);
                 gameObject.GetComponent<GraphScript>().PlotLine(i);
             }
@@ -384,6 +390,55 @@ public class RobotControllerScript : MonoBehaviour
         pText.GetComponent<TextMesh>().text = (posePts.Count - 1).ToString();
         pText.transform.SetParent(dGrip.transform);*/
     }
+
+
+
+
+    public void ReadForceFile(){
+        
+        string forceFilePath;
+        try{
+            forceFilePath = StandaloneFileBrowser.OpenFilePanel("Open force data file", "", "csv", false)[0];
+        }catch{
+            return;
+        }
+
+		////////////Get each row from csv data file
+		StreamReader forceD_data;
+		try{
+			forceD_data = new StreamReader(forceFilePath);
+		}catch{
+           	LogHandler.Logger.Log(gameObject.name + " - ForceGraphScript.cs: Demo force data file does not exist or cannot be read!", LogType.Error);
+			LogHandler.Logger.ShowMessage("Demo force data file does not exist or cannot be read!", "Error!");
+			return;
+		}
+
+        //Read demo data from joint data file
+		string data;
+		data = forceD_data.ReadLine();
+        int count = 0;
+        do{
+			string[] FData = data.Split(new char[] {' '} );
+
+            double val = double.Parse(FData[0]);
+            if(val > 1)
+                forcesD.Add(val);
+
+            count++;
+			data = forceD_data.ReadLine();
+		}while(data != null);
+
+        for(int i = 0; i < count; ++i) {
+            float normTime = (float)i / count;
+            if(normTime < tConstraint)
+                forcesD.Insert(0, 0);
+            else if(normTime >= tSafeComplReplay2)
+                forcesD.Add(0);
+        }
+        
+        //gameObject.GetComponent<GraphScript>().ShowGraph(forcesD);
+    }
+
 
     public void BrowseTimestampFile(){
 

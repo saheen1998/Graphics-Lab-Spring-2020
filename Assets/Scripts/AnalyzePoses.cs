@@ -9,14 +9,15 @@ public class AnalyzePoses : MonoBehaviour
     private List<double> scores = new List<double>();
     private Vector3 prevDir = new Vector3();
     
-    public List<double> CheckPoses(List<Vector3> endEff) {
+    public List<double> CheckPoses(List<Vector3> endEff, List<double> forces) {
         
         this.endEff = endEff;
         scores.Clear();
         scores.Add(0);
 
         for(int i = 10; i < endEff.Count; i++) {
-            CalculateScore(endEff[i], i);
+            float idx = ((float)i/endEff.Count) * forces.Count;
+            CalculateScore(endEff[i], i, forces[(int)idx]);
         }
 
         return scores;
@@ -60,7 +61,7 @@ public class AnalyzePoses : MonoBehaviour
         return scores;
     }
 
-    public void CalculateScore(Vector3 point, int i) {
+    private void CalculateScore(Vector3 point, int i, double force) {
         
         double distance = Func.DistTo(point, endEff[i-1]);
         double movingSlow;
@@ -80,9 +81,21 @@ public class AnalyzePoses : MonoBehaviour
         prevDir.y = endEff[i-10].y - endEff[i-9].y;
         prevDir.z = endEff[i-10].z - endEff[i-9].z;
 
-        double currScore = distance*10000 + movingSlow - sameDir*10;
+        double currScore = distance*10000 + movingSlow - sameDir*10 + force;
 
-        Debug.Log(currScore);
+        //Debug.Log(currScore);
         scores.Add(currScore);
+    }
+
+    private void CalculateAngleScores(Vector3 effAngle1, Vector3 effAngle2) {
+        //Vector3 axisAngle = Func.GetAxisAngle(effAngle);
+        
+        Vector3 diff = new Vector3();
+
+        diff.x = effAngle2.x - effAngle1.x;
+        diff.y = effAngle2.y - effAngle1.y;
+        diff.z = effAngle2.z - effAngle1.z;
+
+        
     }
 }

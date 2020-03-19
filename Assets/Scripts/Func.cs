@@ -32,6 +32,35 @@ public class Func : MonoBehaviour {
 		return sum/(end-start);
 	}
 
+	//Find axis angle
+	/*public static Vector3 GetAxisAngle(Vector3 euAng) {
+		double c1 = Math.Cos(euAng.z/2);
+		double s1 = Math.Sin(euAng.z/2);
+		double c2 = Math.Cos(euAng.y/2);
+		double s2 = Math.Sin(euAng.y/2);
+		double c3 = Math.Cos(euAng.x/2);
+		double s3 = Math.Sin(euAng.x/2);
+		double c1c2 = c1*c2;
+		double s1s2 = s1*s2;
+		w =c1c2*c3 - s1s2*s3;
+		x =c1c2*s3 + s1s2*c3;
+		y =s1*c2*c3 + c1*s2*s3;
+		z =c1*s2*c3 - s1*c2*s3;
+		angle = 2 * Math.Acos(w);
+		double norm = x*x+y*y+z*z;
+		if (norm < 0.001) { // when all euler angles are zero angle =0 so
+			// we can set axis to anything to avoid divide by zero
+			x=1;
+			y=z=0;
+		} else {
+			norm = Math.sqrt(norm);
+			x /= norm;
+			y /= norm;
+			z /= norm;
+		}
+		return new Vector3(x, y, z);
+	}*/
+
 	//Dot Product of 2 matrices
 	public static double DotProductMat(double[,] m1, double[,] m2) {
 		double dot = 0;

@@ -36,7 +36,7 @@ public class UI_Controller : MonoBehaviour
     public double demoSafeRep2;
     public double demoEnd;
     [HideInInspector] public string pointDataFilePath;
-    [HideInInspector] public string jointDataFilePath;
+    /*[HideInInspector]*/ public string jointDataFilePath;
     [HideInInspector] public string constraintDataFilePath;
 
     private Dropdown dropdownConstraintList;

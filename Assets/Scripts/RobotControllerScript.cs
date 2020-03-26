@@ -75,6 +75,7 @@ public class RobotControllerScript : MonoBehaviour
     private List<Quaternion> endEffRot = new List<Quaternion>();
     private AnalyzePoses AnalyzePosesScr;
     private List<double> poseScores;
+    private int customCount = 0;
 
     void AddAnim(string rPath, Transform arm, List<double> d, ref AnimationClip clip)
     {
@@ -232,7 +233,7 @@ public class RobotControllerScript : MonoBehaviour
             poseScores[i] = Func.Median(tempScores, i-hSize, i+hSize);
         }
 
-        gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
+        //gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
         MakeGrippers();
     }
 
@@ -336,7 +337,8 @@ public class RobotControllerScript : MonoBehaviour
         Debug.Log("Gripper duplicated");
         
         GameObject pText = Instantiate(positionText, tipTranform.transform.position, Quaternion.identity);
-        pText.GetComponent<TextMesh>().text = (posePts.Count - 1).ToString();
+        pText.GetComponent<TextMesh>().text = (customCount + 1).ToString();
+        customCount++;
         pText.transform.SetParent(dGrip.transform);
     }
 
@@ -378,7 +380,8 @@ public class RobotControllerScript : MonoBehaviour
         
         for(int i = 0; i < poseScores.Count; i++) {
             if(poseScores[i] == 10) {
-                GameObject dGrip = Instantiate(gripperModel, endEffPos[i], Quaternion.identity);
+                GameObject dGrip = Instantiate(gripperModel, endEffPos[i], endEffRot[i]);
+                dGrip.transform.Rotate(0,90,90);
                 dupGrippers.Add(dGrip);
                 gameObject.GetComponent<GraphScript>().PlotLine(i);
             }

@@ -9,7 +9,6 @@ using UnityEngine.UI;
 
 public class GraphScript : MonoBehaviour
 {
-    public Text textForce;
     public Sprite ptSprite;
     public Sprite lineSprite;
     public RectTransform graphContainer;
@@ -37,11 +36,12 @@ public class GraphScript : MonoBehaviour
         currLineRect.anchorMax = new Vector2(0, 0.5f);
     }
 
-    void PlotPoint(Vector2 pos){
+    void PlotPoint(Vector2 pos, Color c){
         GameObject pt = new GameObject("GraphPt", typeof(Image));
         pt.transform.SetParent(graphContainer, false);
         pt.gameObject.tag = "Graph Point";
         pt.GetComponent<Image>().sprite = ptSprite;
+        pt.GetComponent<Image>().color = c;
         RectTransform ptRect= pt.GetComponent<RectTransform>();
         ptRect.anchoredPosition = pos;
         ptRect.sizeDelta = new Vector2(1, 1);
@@ -57,7 +57,22 @@ public class GraphScript : MonoBehaviour
         {
             float xPos =  ((float)(i) / (count-1)) * width;
             float yPos = (float)val[i] / ymax * height;
-            PlotPoint(new Vector2(xPos, yPos));
+            PlotPoint(new Vector2(xPos, yPos), Color.white);
+        }
+    }
+
+    public void ShowGraph(double[][] vals, int[] cluster) {
+        
+        for (int i = 0; i < vals.Length; ++i)
+        {
+            float xPos =  (float)vals[i][0] * width;
+            float yPos = (float)vals[i][1] * height;
+            if(cluster[i] == 0)
+                PlotPoint(new Vector2(xPos, yPos), Color.red);
+            else if(cluster[i] == 1)
+                PlotPoint(new Vector2(xPos, yPos), Color.green);
+            else
+                PlotPoint(new Vector2(xPos, yPos), Color.blue);
         }
     }
 

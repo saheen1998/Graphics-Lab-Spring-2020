@@ -5,9 +5,14 @@ using UnityEngine;
 
 public class AnalyzePoses : MonoBehaviour
 {
+    public KmeansClustering kmeansScr;
     private List<Vector3> endEff;
     private List<double> scores = new List<double>();
     private Vector3 prevDir = new Vector3();
+
+    private List<double> dists = new List<double>();
+    private List<double> moveSlows = new List<double>();
+    private List<double> sameDirs = new List<double>();
     
     public List<double> CheckPoses(List<Vector3> endEff, List<double> forces) {
         
@@ -20,7 +25,12 @@ public class AnalyzePoses : MonoBehaviour
             CalculateScore(endEff[i], i, forces[(int)idx]);
         }
 
+
         return scores;
+    }
+
+    public void StartKmeans() {
+        kmeansScr.StartClustering(dists, moveSlows, sameDirs);
     }
 
     //Constant time interval
@@ -82,6 +92,10 @@ public class AnalyzePoses : MonoBehaviour
         prevDir.z = endEff[i-10].z - endEff[i-9].z;
 
         double currScore = distance*10000 + movingSlow - sameDir*10 + force;
+
+        dists.Add(distance*1000);
+        moveSlows.Add(movingSlow);
+        sameDirs.Add(sameDir);
 
         //Debug.Log(currScore);
         scores.Add(currScore);

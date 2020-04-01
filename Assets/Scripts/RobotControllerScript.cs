@@ -224,7 +224,7 @@ public class RobotControllerScript : MonoBehaviour
 
     public void ShowScores() {
 
-        poseScores = AnalyzePosesScr.CheckPoses(endEffPos, forcesD);
+        poseScores = AnalyzePosesScr.CheckPoses(endEffPos/*, forcesD*/);
 
         int winSize = 51;
         int hSize = winSize/2;
@@ -234,7 +234,7 @@ public class RobotControllerScript : MonoBehaviour
         }
 
         //gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
-        MakeGrippers();
+        //MakeGrippers();
     }
 
     public void ConstantTimeIntPoses() {
@@ -373,6 +373,15 @@ public class RobotControllerScript : MonoBehaviour
         pText.transform.SetParent(dGrip.transform);*/
     }
 
+    public void MakeGrippers(int[] idxs) {
+        for(int i = 0; i < idxs.Length; ++i) {
+            Debug.Log("Making gripper " + i + "; Pos idx = " + idxs[i]);
+            GameObject dGrip = Instantiate(gripperModel, endEffPos[idxs[i]], endEffRot[idxs[i]]);
+            dGrip.transform.Rotate(0,90,90);
+            dupGrippers.Add(dGrip);
+            gameObject.GetComponent<GraphScript>().PlotLine(idxs[i]);
+        }
+    }
     
     public void MakeGrippersForInt(){
 

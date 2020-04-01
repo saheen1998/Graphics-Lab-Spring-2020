@@ -6,6 +6,7 @@ using UnityEngine;
 public class AnalyzePoses : MonoBehaviour
 {
     public KmeansClustering kmeansScr;
+    public RobotControllerScript rbcScr;
     private List<Vector3> endEff;
     private List<double> scores = new List<double>();
     private Vector3 prevDir = new Vector3();
@@ -14,15 +15,15 @@ public class AnalyzePoses : MonoBehaviour
     private List<double> moveSlows = new List<double>();
     private List<double> sameDirs = new List<double>();
     
-    public List<double> CheckPoses(List<Vector3> endEff, List<double> forces) {
+    public List<double> CheckPoses(List<Vector3> endEff/*, List<double> forces*/) {
         
         this.endEff = endEff;
         scores.Clear();
         scores.Add(0);
 
         for(int i = 10; i < endEff.Count; i++) {
-            float idx = ((float)i/endEff.Count) * forces.Count;
-            CalculateScore(endEff[i], i, forces[(int)idx]);
+            //float idx = ((float)i/endEff.Count) * forces.Count;
+            CalculateScore(endEff[i], i, 0/*forces[(int)idx]*/);
         }
 
 
@@ -30,7 +31,8 @@ public class AnalyzePoses : MonoBehaviour
     }
 
     public void StartKmeans() {
-        kmeansScr.StartClustering(dists, moveSlows, sameDirs);
+        int[] pts = kmeansScr.StartClustering(dists, moveSlows, sameDirs, 5);
+        rbcScr.MakeGrippers(pts);
     }
 
     //Constant time interval
@@ -75,10 +77,8 @@ public class AnalyzePoses : MonoBehaviour
         
         double distance = Func.DistTo(point, endEff[i-1]);
         double movingSlow;
-        if(distance < 0.01)
-            movingSlow = 0.1;
-        else
-            movingSlow = 1 / (distance * 1000);
+        movingSlow = 1 / (distance * 1000);
+        movingSlow = (double)Mathf.Clamp((float)movingSlow, 0.1f, 10);
         
         float vx = endEff[i-2].x - point.x;
         float vy = endEff[i-2].y - point.y;
@@ -96,6 +96,8 @@ public class AnalyzePoses : MonoBehaviour
         dists.Add(distance*1000);
         moveSlows.Add(movingSlow);
         sameDirs.Add(sameDir);
+
+        //Debug.Log(distance*1000 + ", " + movingSlow + ", " + sameDir);
 
         //Debug.Log(currScore);
         scores.Add(currScore);

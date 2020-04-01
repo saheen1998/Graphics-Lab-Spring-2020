@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class KmeansClustering : MonoBehaviour
 {
-    public void StartClustering(List<double> f1, List<double> f2, List<double> f3)
+    public double[][] allMeans;
+    public int[] StartClustering(List<double> f1, List<double> f2, List<double> f3, int numClusters)
     {
-        int numClusters = 2;
         Debug.Log("Setting numClusters to " + numClusters);
 
         int n = f1.Count;
@@ -15,25 +15,81 @@ public class KmeansClustering : MonoBehaviour
         List<double> vals = new List<double>();
 
         for(int i = 0; i < n; ++i) {
-            rawData[i] = new double[] {f1[i], f3[i]};
+            rawData[i] = new double[] {f2[i], f3[i]};
         }
-        /*for(int i = 0; i < n; ++i) {
-            rawData[n + i] = new double[] {(double)i, f2[i]};
-            vals.Add(f2[i]);
-        }
-        for(int i = 0; i < n; ++i) {
-            rawData[n + n + i] = new double[] {(double)i, f3[i]};
-            vals.Add(f3[i]);
-        }*/
 
         int[] clustering = Cluster(rawData, numClusters);
-        for(int i = 0; i < clustering.Length; ++i)
-            Debug.Log(clustering[i]);
+        /*for(int i = 0; i < clustering.Length; ++i)
+            Debug.Log(clustering[i]);*/
 
         gameObject.GetComponent<GraphScript>().ShowGraph(rawData, clustering);
+
+        double[] shortestDists = new double[numClusters];
+        //double[][] nearestPts = new double[clustering.Length][];
+        int[] nearestPts = new int[numClusters];
+        for(int i = 0; i < shortestDists.Length; ++i) {
+            shortestDists[i] = Int32.MaxValue;
+        }
+        for(int i = 0; i < clustering.Length; ++i) {
+            switch(clustering[i]) {
+                case 0: double newDist = Func.DistTo(new Vector2((float)rawData[i][0], (float)rawData[i][1]), new Vector2((float)allMeans[0][0], (float)allMeans[0][1]));
+                        
+                        if(newDist <= shortestDists[0]) {
+                            shortestDists[0] = newDist;
+                            //nearestPts[0] = rawData[i];
+                            nearestPts[0] = i;
+                            Debug.Log(new Vector2((float)allMeans[0][0], (float)allMeans[0][1]) + " : " + newDist + " at index " + i);
+                        }
+                        break;
+                case 1: newDist = Func.DistTo(new Vector2((float)rawData[i][0], (float)rawData[i][1]), new Vector2((float)allMeans[1][0], (float)allMeans[1][1]));
+                        
+                        if(newDist <= shortestDists[1]) {
+                            shortestDists[1] = newDist;
+                            //nearestPts[0] = rawData[i];
+                            nearestPts[1] = i;
+                            Debug.Log(new Vector2((float)allMeans[1][0], (float)allMeans[1][1]) + " : " + newDist + " at index " + i);
+                        }
+                        break;
+                case 2: newDist = Func.DistTo(new Vector2((float)rawData[i][0], (float)rawData[i][1]), new Vector2((float)allMeans[2][0], (float)allMeans[2][1]));
+                        if(newDist <= shortestDists[2]) {
+                            shortestDists[2] = newDist;
+                            //nearestPts[0] = rawData[i];
+                            nearestPts[2] = i;
+                            Debug.Log(new Vector2((float)allMeans[2][0], (float)allMeans[2][1]) + " : " + newDist + " at index " + i);
+                        }
+                        break;
+                case 3: newDist = Func.DistTo(new Vector2((float)rawData[i][0], (float)rawData[i][1]), new Vector2((float)allMeans[3][0], (float)allMeans[3][1]));
+                        if(newDist <= shortestDists[3]) {
+                            shortestDists[3] = newDist;
+                            //nearestPts[0] = rawData[i];
+                            nearestPts[3] = i;
+                            Debug.Log(new Vector2((float)allMeans[3][0], (float)allMeans[3][1]) + " : " + newDist + " at index " + i);
+                        }
+                        break;
+                case 4: newDist = Func.DistTo(new Vector2((float)rawData[i][0], (float)rawData[i][1]), new Vector2((float)allMeans[4][0], (float)allMeans[4][1]));
+                        if(newDist <= shortestDists[4]) {
+                            shortestDists[4] = newDist;
+                            //nearestPts[0] = rawData[i];
+                            nearestPts[4] = i;
+                            Debug.Log(new Vector2((float)allMeans[4][0], (float)allMeans[4][1]) + " : " + newDist + " at index " + i);
+                        }
+                        break;
+                case 5: newDist = Func.DistTo(new Vector2((float)rawData[i][0], (float)rawData[i][1]), new Vector2((float)allMeans[5][0], (float)allMeans[5][1]));
+                        if(newDist <= shortestDists[5]) {
+                            shortestDists[5] = newDist;
+                            //nearestPts[0] = rawData[i];
+                            nearestPts[5] = i;
+                            Debug.Log(new Vector2((float)allMeans[5][0], (float)allMeans[5][1]) + " : " + newDist + " at index " + i);
+                        }
+                        break;
+            }
+        }
+
+        Debug.Log("Kmeans Complete!");
+        return nearestPts;
     }
 
-    public static int[] Cluster(double[][] rawData, int numClusters)
+    public int[] Cluster(double[][] rawData, int numClusters)
     {
         double[][] data = Normalized(rawData);
         bool changed = true; bool success = true;
@@ -46,6 +102,9 @@ public class KmeansClustering : MonoBehaviour
             success = UpdateMeans(data, clustering, means);
             changed = UpdateClustering(data, clustering, means);
         }
+
+        allMeans = means;
+
         return clustering;
     }
 

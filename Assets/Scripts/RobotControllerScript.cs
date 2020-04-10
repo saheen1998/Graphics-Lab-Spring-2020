@@ -71,8 +71,8 @@ public class RobotControllerScript : MonoBehaviour
     private float pAng = 0;
     public static List<GameObject> dupGrippers = new List<GameObject>();
     public GameObject positionText;
-    private List<Vector3> endEffPos = new List<Vector3>();
-    private List<Quaternion> endEffRot = new List<Quaternion>();
+    [HideInInspector] public List<Vector3> endEffPos;
+    private List<Quaternion> endEffRot;
     private AnalyzePoses AnalyzePosesScr;
     private List<double> poseScores;
     private int customCount = 0;
@@ -135,6 +135,9 @@ public class RobotControllerScript : MonoBehaviour
     {
         trail = tipTranform.GetComponent<TrailRenderer>();
 		line = gameObject.GetComponent<LineRenderer>();
+
+        endEffPos = new List<Vector3>();
+        endEffRot = new List<Quaternion>();
 
         d0 = new List<double>();
         d1 = new List<double>();
@@ -360,7 +363,6 @@ public class RobotControllerScript : MonoBehaviour
                 count++;
                 //Debug.Log((i/(float)poseScores.Count) + " : " + poseScores[i]);
                 GameObject dGrip = Instantiate(gripperModel, endEffPos[i], endEffRot[i]);
-                dGrip.transform.Rotate(0,90,90);
                 dupGrippers.Add(dGrip);
                 gameObject.GetComponent<GraphScript>().PlotLine(i);
             }
@@ -377,7 +379,6 @@ public class RobotControllerScript : MonoBehaviour
         for(int i = 0; i < idxs.Length; ++i) {
             Debug.Log("Making gripper " + i + "; Pos idx = " + idxs[i]);
             GameObject dGrip = Instantiate(gripperModel, endEffPos[idxs[i]], endEffRot[idxs[i]]);
-            dGrip.transform.Rotate(0,90,90);
             dupGrippers.Add(dGrip);
             gameObject.GetComponent<GraphScript>().PlotLine(idxs[i]);
         }
@@ -390,7 +391,6 @@ public class RobotControllerScript : MonoBehaviour
         for(int i = 0; i < poseScores.Count; i++) {
             if(poseScores[i] == 10) {
                 GameObject dGrip = Instantiate(gripperModel, endEffPos[i], endEffRot[i]);
-                dGrip.transform.Rotate(0,90,90);
                 dupGrippers.Add(dGrip);
                 gameObject.GetComponent<GraphScript>().PlotLine(i);
             }
@@ -403,6 +403,9 @@ public class RobotControllerScript : MonoBehaviour
         pText.transform.SetParent(dGrip.transform);*/
     }
 
+    public void OptimizeCamera() {
+        GameObject.Find("Camera Optimize").GetComponent<OptimizeCameraAngle>().OptimizeCamera(endEffPos, endEffRot);
+    }
 
 
 

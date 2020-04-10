@@ -15,7 +15,7 @@ public class KmeansClustering : MonoBehaviour
         List<double> vals = new List<double>();
 
         for(int i = 0; i < n; ++i) {
-            rawData[i] = new double[] {f2[i], f3[i]};
+            rawData[i] = new double[] {f1[i], f2[i]};
         }
 
         int[] clustering = Cluster(rawData, numClusters);

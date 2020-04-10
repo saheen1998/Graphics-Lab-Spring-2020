@@ -13,7 +13,7 @@ public class ForwardKinematics : MonoBehaviour
         arm[3].localRotation = Quaternion.Euler(0, 0, ang[3] * Mathf.Rad2Deg);
         arm[4].localRotation = Quaternion.Euler(-ang[4] * Mathf.Rad2Deg, 0, 0);
         arm[5].localRotation = Quaternion.Euler(0, 0, ang[5] * Mathf.Rad2Deg);
-        arm[6].localRotation = Quaternion.Euler(ang[6] * Mathf.Rad2Deg, 0, 0);
+        arm[6].localRotation = Quaternion.Euler(-ang[6] * Mathf.Rad2Deg, 0, 0);
     }
 
     public Vector3 GetPoint(){

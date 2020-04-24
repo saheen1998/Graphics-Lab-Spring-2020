@@ -16,6 +16,7 @@ public class CamConstraint : MonoBehaviour
 		StartCoroutine(EnumResetPos());
 	}
 
+	//Reset the camera's center to the center of the bounding box containing all points from demo CSV file
     IEnumerator EnumResetPos()
     {
         yield return new WaitForSeconds(0.05f);

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class ObjectControllerScript : MonoBehaviour
 {
+    public GameObject walls;
     public Transform table;
     public Slider heightSlider;
     public Slider distSlider;
@@ -24,5 +25,9 @@ public class ObjectControllerScript : MonoBehaviour
     public void SetTableDist(float d) {
         table.position = new Vector3(d, table.position.y, table.position.z);
         distSlider.gameObject.transform.GetChild(0).gameObject.GetComponent<Text>().text = (table.position.x).ToString("F4");
+    }
+
+    public void ToggleWalls() {
+        walls.SetActive((walls.activeSelf) ? (false) : (true));
     }
 }

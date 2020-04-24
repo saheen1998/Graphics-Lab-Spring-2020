@@ -32,6 +32,7 @@ public class RobotControllerScript : MonoBehaviour
     public Material mat_interact;
     public Material mat_normal;
     public GameObject gripperModel;
+    public GameObject gripperCorrectedModel;
     
     [HideInInspector] public Animation anim;
     
@@ -67,15 +68,13 @@ public class RobotControllerScript : MonoBehaviour
     public float angleWeight;
     public float scoreThreshold;
     public static List<Vector3> posePts = new List<Vector3>();
-    public static List<float> poseTimes = new List<float>();
-    private float pAng = 0;
     public static List<GameObject> dupGrippers = new List<GameObject>();
     public GameObject positionText;
     [HideInInspector] public List<Vector3> endEffPos;
     private List<Quaternion> endEffRot;
     private AnalyzePoses AnalyzePosesScr;
     private List<double> poseScores;
-    private int customCount = 0;
+    private int customGripperCount = 0;
 
     void AddAnim(string rPath, Transform arm, List<double> d, ref AnimationClip clip)
     {
@@ -225,21 +224,6 @@ public class RobotControllerScript : MonoBehaviour
         anim.AddClip(clip, "regular");
     }
 
-    public void ShowScores() {
-
-        poseScores = AnalyzePosesScr.CheckPoses(endEffPos/*, forcesD*/);
-
-        int winSize = 51;
-        int hSize = winSize/2;
-        List<double> tempScores = new List<double>(poseScores);
-        for(int i = hSize; i < tempScores.Count-hSize; i++){
-            poseScores[i] = Func.Median(tempScores, i-hSize, i+hSize);
-        }
-
-        //gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
-        //MakeGrippers();
-    }
-
     public void ConstantTimeIntPoses() {
         
         poseScores = AnalyzePosesScr.ExtractPoseTimeInt(endEffPos);
@@ -289,66 +273,58 @@ public class RobotControllerScript : MonoBehaviour
             }
             else textDesc.text = "Replay end";
         }catch{}
-
-        ///////////////////////Pose extraction///////////////////////////////////
         
         //Time
         try{
             if(anim.IsPlaying("regular")){
-                //ExtractPose();
                 gameObject.GetComponent<GraphScript>().UpdateCurrentState(anim["regular"].normalizedTime);
             }
         }catch{}
     }
-/*
-    private void ExtractPose(){
-        
-        //Time
-        double t = anim["regular"].normalizedTime - poseTimes[poseTimes.Count - 1];
-        //Debug.Log(t);
 
-        //Distance
-        double d = Func.DistTo(tipTranform.position, posePts[posePts.Count - 1]);
-        //Debug.Log(d);
+    //////////////////******Pose extraction******//////////////////////////////////////
+    public void ClearAll() {
 
-        //Compare angle to angle from a previous frame
-        float euAng = (tipTranform.eulerAngles.x + tipTranform.eulerAngles.y + tipTranform.eulerAngles.z);
-        //Debug.Log(tipTranform.eulerAngles.x + ", " + tipTranform.eulerAngles.y + ", " + tipTranform.eulerAngles.z + " = " + euAng);
-        float ang = 0;
-        if(t >= 0.05){
-            ang = Func.AngleDiff(pAng, euAng);
-        }else if(t<0.01){
-            pAng = euAng;
+        foreach (GameObject dg in dupGrippers)
+        {
+            Destroy(dg);
         }
-        //Debug.Log(pAng + ", " + euAng);
+        posePts.Clear();
+        posePts.Add(line.GetPosition(0));
+        customGripperCount = 0;
+    }
+    
+    public void ShowScores() {
 
+        poseScores = AnalyzePosesScr.CheckPoses(endEffPos/*, forcesD*/);
 
-        //Calculate score
-        double score = (t*timeWeight + d*distanceWeight + ang*angleWeight);
-        //Debug.Log("d=" + d*distanceWeight + ", t=" + t*timeWeight + ", ang=" + ang*angleWeight + " : Score=" + score);
-        if(score > scoreThreshold){
-            Debug.Log("d=" + d*distanceWeight + ", t=" + t*timeWeight + ", ang=" + ang*angleWeight + " : Score=" + score);
-            posePts.Add(tipTranform.position);
-            poseTimes.Add(anim["regular"].normalizedTime);
-            DuplicateGripper();
+        int winSize = 51;
+        int hSize = winSize/2;
+        List<double> tempScores = new List<double>(poseScores);
+        for(int i = hSize; i < tempScores.Count-hSize; i++){
+            poseScores[i] = Func.Median(tempScores, i-hSize, i+hSize);
         }
-    }*/
+
+        //gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
+        MakeGrippers();
+    }
     
     public void DuplicateGripper(){
-        GameObject dGrip = Instantiate(gripperModel, gripper.transform.position, gripper.transform.rotation);
+        GameObject dGrip = Instantiate(gripperCorrectedModel, gripper.transform.position, gripper.transform.rotation);
         dupGrippers.Add(dGrip);
-        Debug.Log("Gripper duplicated");
         
+        //Gripper Label Text
         GameObject pText = Instantiate(positionText, tipTranform.transform.position, Quaternion.identity);
-        pText.GetComponent<TextMesh>().text = (customCount + 1).ToString();
-        customCount++;
+        pText.GetComponent<TextMesh>().text = (customGripperCount + 1).ToString();
+        customGripperCount++;
         pText.transform.SetParent(dGrip.transform);
     }
 
-    public void MakeGrippers(){
+    private void MakeGrippers(){
 
         int count = 0;
         int winSize = 101;
+        int gripperCount = 0;
         
         for(int i = winSize/2; i < poseScores.Count-winSize/2; i++) {
             int flag = 1;
@@ -364,15 +340,17 @@ public class RobotControllerScript : MonoBehaviour
                 //Debug.Log((i/(float)poseScores.Count) + " : " + poseScores[i]);
                 GameObject dGrip = Instantiate(gripperModel, endEffPos[i], endEffRot[i]);
                 dupGrippers.Add(dGrip);
-                gameObject.GetComponent<GraphScript>().PlotLine(i);
+                //gameObject.GetComponent<GraphScript>().PlotLine(i);
+
+                //Gripper Label Text
+                GameObject pText = Instantiate(positionText, dGrip.transform.position, Quaternion.identity);
+                pText.GetComponent<TextMesh>().text = (gripperCount + 1).ToString();
+                gripperCount++;
+                pText.transform.SetParent(dGrip.transform);
             }
         }
 
         Debug.Log("Number of candidate poses: " + count);
-        
-        /*GameObject pText = Instantiate(positionText, pos, Quaternion.identity);
-        pText.GetComponent<TextMesh>().text = (posePts.Count - 1).ToString();
-        pText.transform.SetParent(dGrip.transform);*/
     }
 
     public void MakeGrippers(int[] idxs) {
@@ -386,29 +364,30 @@ public class RobotControllerScript : MonoBehaviour
     
     public void MakeGrippersForInt(){
 
-        int count = 0;
-        
+        int gripperCount = 0;
+
         for(int i = 0; i < poseScores.Count; i++) {
             if(poseScores[i] == 10) {
                 GameObject dGrip = Instantiate(gripperModel, endEffPos[i], endEffRot[i]);
                 dupGrippers.Add(dGrip);
-                gameObject.GetComponent<GraphScript>().PlotLine(i);
+                
+                //Gripper Label Text
+                GameObject pText = Instantiate(positionText, dGrip.transform.position, Quaternion.identity);
+                pText.GetComponent<TextMesh>().text = (gripperCount + 1).ToString();
+                gripperCount++;
+                pText.transform.SetParent(dGrip.transform);
             }
         }
-
-        Debug.Log("Number of candidate poses: " + count);
-        
-        /*GameObject pText = Instantiate(positionText, pos, Quaternion.identity);
-        pText.GetComponent<TextMesh>().text = (posePts.Count - 1).ToString();
-        pText.transform.SetParent(dGrip.transform);*/
     }
 
     public void OptimizeCamera() {
         GameObject.Find("Camera Optimize").GetComponent<OptimizeCameraAngle>().OptimizeCamera(endEffPos, endEffRot);
     }
 
+    /////////////////************END*************//////////////////////////////////////
 
 
+    /////////////////************UI Buttons*************//////////////////////////////
     public void ReadForceFile(){
         
         string forceFilePath;
@@ -450,8 +429,6 @@ public class RobotControllerScript : MonoBehaviour
             else if(normTime >= tSafeComplReplay2)
                 forcesD.Add(0);
         }
-        
-        //gameObject.GetComponent<GraphScript>().ShowGraph(forcesD);
     }
 
 
@@ -501,16 +478,6 @@ public class RobotControllerScript : MonoBehaviour
         }catch{
             LogHandler.Logger.Log(gameObject.name + " - RobotControllerScript: Joint animation clip not found", LogType.Warning);
         }
-        
-        foreach (GameObject dg in dupGrippers)
-        {
-            Destroy(dg);
-        }
-        posePts.Clear();
-        posePts.Add(line.GetPosition(0));
-        poseTimes.Clear();
-        poseTimes.Add(0);
-        pAng = 0;
     }
 
     public void ChangeAnimSpeed(float spd){

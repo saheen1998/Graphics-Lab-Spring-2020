@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+/* Camera movement script
+    Dragging mouse along the screen moves an invisible sphere to which the camera is a child of
+*/
 public class CamFree_Orbit : MonoBehaviour
 {
     public float rotateSpeed = 8f;

@@ -8,15 +8,14 @@ using SFB;
 
 public class UI_Controller : MonoBehaviour
 {
-    //public CanvasScaler canvas;
     public GameObject menu;
+    public GameObject poseMenu;
     public List<GameObject> cameras;
     public List<GameObject> options;
     public List<GameObject> penPrefabs;
     public GameObject inputFields;
     public List<InputField> info;
     public GameObject constraintList;
-    public List<TMP_InputField> CamPos;
     public Material matNormal;
     public Material matSelected;
     public Camera snapCam;
@@ -50,6 +49,7 @@ public class UI_Controller : MonoBehaviour
             cam.SetActive(false);
         }
         cameras[index].SetActive(true);
+        cameras[1].SetActive(true);
     }
 
     public void ToggleOptions(){
@@ -60,7 +60,13 @@ public class UI_Controller : MonoBehaviour
     }
     
     public void ToggleMenu(){
+        poseMenu.SetActive(false);
         menu.SetActive((menu.activeSelf) ? (false) : (true));
+    }
+
+    public void TogglePoseMenu(){
+        menu.SetActive(false);
+        poseMenu.SetActive((poseMenu.activeSelf) ? (false) : (true));
     }
 
     ///////////////////Functions for constraint

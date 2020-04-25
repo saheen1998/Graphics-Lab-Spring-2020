@@ -45,7 +45,9 @@ public class AnalyzePoses : MonoBehaviour
         rbcScr.MakeGrippers(pts);
     }
 
-    //Get end effector poses in a constant time interval
+    /*Get end effector poses in a constant time interval
+        *Set the score of poses after interval as 10 and 0 for every other poses
+    */
     public List<double> ExtractPoseTimeInt(List<Vector3> endEff) {
         
         this.endEff = endEff;

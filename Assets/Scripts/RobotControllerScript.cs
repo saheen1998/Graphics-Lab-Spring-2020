@@ -11,6 +11,7 @@ using SFB;
 
 public class RobotControllerScript : MonoBehaviour
 {
+    public Text precisionInput;
     public float animationSpeed = 1;
     public Text textAnimSpeed;
     public enum enMotion{regular, dab};
@@ -323,7 +324,7 @@ public class RobotControllerScript : MonoBehaviour
     private void MakeGrippers(){
 
         int count = 0;
-        int winSize = 101;
+        int winSize = Int32.Parse(precisionInput.text);
         int gripperCount = 0;
         
         for(int i = winSize/2; i < poseScores.Count-winSize/2; i++) {

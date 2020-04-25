@@ -1,4 +1,4 @@
-2020/04/24 06:28:54 - Warning
+2020/04/24 07:46:22 - Warning
 	CamFree - CamConstraint.cs: Points not found!
-2020/04/24 06:29:09 - Warning
-	CamFree - CamConstraint.cs: Points not found!
+2020/04/24 07:46:32 - Warning
+	Pen 0 - Constraint_axial.cs: Constraint input data is null or not in the correct format!

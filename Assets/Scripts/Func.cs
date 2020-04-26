@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+//Custom static functions used for calculations in different scripts
 public class Func : MonoBehaviour {
 
 	//Distance between two points
@@ -175,7 +176,7 @@ public class Func : MonoBehaviour {
 			return 0;
 	}
 
-	//Matrix to quaternion
+	// Rotation matrix to quaternion
 	public static void matToQ(double[,] ew, ref float qx, ref float qy, ref float qz, ref float qw){
 		float tr = (float)(ew[0,0] + ew[1,1] + ew[2,2]);
 

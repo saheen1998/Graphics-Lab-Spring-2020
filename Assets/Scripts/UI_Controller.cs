@@ -10,6 +10,7 @@ public class UI_Controller : MonoBehaviour
 {
     public GameObject menu;
     public GameObject poseMenu;
+    public GameObject ImageSavedAlert;
     public List<GameObject> cameras;
     public List<GameObject> options;
     public List<GameObject> penPrefabs;
@@ -20,8 +21,9 @@ public class UI_Controller : MonoBehaviour
     public Material matSelected;
     public Camera snapCam;
 
-    //Used inside scripts only
+    //Variables used inside script only//////////////
     [HideInInspector] public bool toBrowse;
+    // Constraint data
     [HideInInspector] public List<double> wx;
     [HideInInspector] public List<double> wy;
     [HideInInspector] public List<double> wz;
@@ -35,13 +37,16 @@ public class UI_Controller : MonoBehaviour
     public double demoSafeRep2;
     public double demoEnd;
     [HideInInspector] public string pointDataFilePath;
-    /*[HideInInspector]*/ public string jointDataFilePath;
+    [HideInInspector] public string jointDataFilePath;
     [HideInInspector] public string constraintDataFilePath;
 
     private Dropdown dropdownConstraintList;
     [HideInInspector] public int selectedConsIdx = 0;
     private int constraintInd = 0;
     
+    // Change the camera
+    // cameras[1] always needs to be active it is the camera used for optimization
+    // Optimization camera has a depth of -1 so that when 'free orbit' camera (depth of 0) is active the screen switches to that camera
     public void ChangeCamera(int index)
     {
         foreach (GameObject cam in cameras)
@@ -69,7 +74,7 @@ public class UI_Controller : MonoBehaviour
         poseMenu.SetActive((poseMenu.activeSelf) ? (false) : (true));
     }
 
-    ///////////////////Functions for constraint
+    ///////////////////Functions for constraint////////////
     public void SetConstraint(int ind){
         constraintInd = ind;
     }
@@ -113,6 +118,7 @@ public class UI_Controller : MonoBehaviour
         }*/
     }
 
+    // Remove the constraint by removing it from dropdown list and saved constraints data
     public void RemoveConstraint(){
         string cText = dropdownConstraintList.options[dropdownConstraintList.value].text;
         string[] cNum = cText.Split(new char[] {'.'} );
@@ -125,6 +131,7 @@ public class UI_Controller : MonoBehaviour
                 Destroy(pt);
         }
 
+        // Remove the constraint data associated with the selected constraint
         wx.RemoveAt(dropdownConstraintList.value);
         wy.RemoveAt(dropdownConstraintList.value);
         wz.RemoveAt(dropdownConstraintList.value);
@@ -133,6 +140,7 @@ public class UI_Controller : MonoBehaviour
         dz.RemoveAt(dropdownConstraintList.value);
         rad.RemoveAt(dropdownConstraintList.value);
 
+        // Remove constraint from the dropdown list
         dropdownConstraintList.options.RemoveAt(dropdownConstraintList.value);
         if(dropdownConstraintList.options.Count <= 0)
             constraintList.transform.GetChild(0).GetComponent<Text>().text = "";
@@ -174,7 +182,7 @@ public class UI_Controller : MonoBehaviour
     public void ShowConstraintList(){
         constraintList.SetActive((constraintList.activeSelf) ? (false) : (true));
     }
-    ///////////////////////////////////
+    //////////////////////********END*************////////////////////////////
 
     public void SetPointDataFile(){
         try{
@@ -188,18 +196,14 @@ public class UI_Controller : MonoBehaviour
         }catch{}
     }
 
-    /*public void SetCamPos(){
-        cameras[2].transform.position = new Vector3((float)double.Parse(CamPos[0].text), (float)double.Parse(CamPos[2].text), (float)double.Parse(CamPos[1].text));
-        cameras[2].transform.LookAt(GameObject.Find("Tip").GetComponent<Transform>().position);
-    }*/
-
     public void TakePicture() {
         Texture2D snapshot = new Texture2D(1024, 768, TextureFormat.RGB24, false);
         RenderTexture.active = snapCam.targetTexture;
         snapshot.ReadPixels(new Rect(0,0,1024,768), 0, 0);
         byte[] bytes = snapshot.EncodeToPNG();
         System.IO.File.WriteAllBytes(Application.dataPath + "/Snapshot " + System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".png", bytes);
-        Debug.Log(Application.dataPath);
+        //Debug.Log(Application.dataPath);
+        ImageSavedAlert.GetComponent<ImageSaved>().activate();
     }
 
     private void Start() {

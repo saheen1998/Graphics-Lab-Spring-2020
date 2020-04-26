@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 
 /* Camera movement script
     Dragging mouse along the screen moves an invisible sphere to which the camera is a child of
+    *Camera is attached to a invisible shpere which is rotated or translated based on mouse input
 */
 public class CamFree_Orbit : MonoBehaviour
 {
@@ -13,7 +14,8 @@ public class CamFree_Orbit : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButton(0) && Input.GetKey("left shift"))
+        //Pan camera when right mouse button is pressed
+        if (Input.GetMouseButton(1))
         {
             if (EventSystem.current.IsPointerOverGameObject())
                 return;
@@ -21,6 +23,7 @@ public class CamFree_Orbit : MonoBehaviour
             float v = transform.localScale.x/100 * moveSpeed * Input.GetAxis("Mouse Y");
             transform.Translate(new Vector3(-v, 0, h), Space.Self);
         }
+        //Rotate camera when left mouse button is pressed
         else if (Input.GetMouseButton(0))
         {
             if (EventSystem.current.IsPointerOverGameObject())
@@ -34,6 +37,7 @@ public class CamFree_Orbit : MonoBehaviour
             transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y + h, transform.eulerAngles.z + v);
         }
 
+        //Zoom in and out using mouse wheel
         float scrollFactor = Input.GetAxis("Mouse ScrollWheel");
 
         if (scrollFactor != 0)

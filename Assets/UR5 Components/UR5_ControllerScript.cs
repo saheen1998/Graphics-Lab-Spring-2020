@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-//using System.Windows.Forms;
 using System.Linq;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-//using UnityEngine.Video;
 using SFB;
 
-// Script for Sawyer
-public class RobotControllerScript : MonoBehaviour
+public class UR5_ControllerScript : MonoBehaviour
 {
-    public Text precisionInput; // To get window size
+    public Text precisionInput;
+    public Text textDesc;
     public Transform tipTranform; //The tip (center) of the end-effector
-
 
     public Transform L0;
     public Transform L1;
@@ -22,59 +19,90 @@ public class RobotControllerScript : MonoBehaviour
     public Transform L3;
     public Transform L4;
     public Transform L5;
-    public Transform L6;
-    
-
-    public Text textDesc;
 
     public Material mat_interact;
     public Material mat_normal;
-    public GameObject gripperModel;
-    public GameObject gripperCorrectedModel;
-
-
-    //////Variables used inside script/////////
+    public GameObject gripperCorrectedModel; //For new algorithm
+    public GameObject gripperModel; //For custom pose selection
+    
     [HideInInspector] public Animation anim;
+    
     private AnimationClip clip;
-    private AnimationClip dabClip;
-    private int n_data;
-    private ForwardKinematics FKscr;
-    private bool robotVisible = true;
-
-    // Joint angles for each arm
     private List<double> d0;
     private List<double> d1;
     private List<double> d2;
     private List<double> d3;
     private List<double> d4;
     private List<double> d5;
-    private List<double> d6;
     
     private double tSafeComplPos = 2;
     private double tSafeComplReplay1 = 2;
     private double tConstraint = 2;
     private double tSafeComplReplay2 = 2;
     private double tEnd = 2;
-
+    private int n_data;
+    private ForwardKinematicsUR5 FKscr;
+    private bool robotVisible = true;
+    
     private GameObject gripper;
-    private LineRenderer line;
+    private LineRenderer line; // Line to draw trajectory
     private Renderer rend;
-
-    private List<double> forces = new List<double>();
-
+    
     //Pose extraction
     public static List<Vector3> posePts = new List<Vector3>();
     public static List<GameObject> dupGrippers = new List<GameObject>();
     public GameObject positionText;
+    private List<double> forces = new List<double>();
     [HideInInspector] public List<Vector3> endEffPos;
     private List<Quaternion> endEffRot;
-    private AnalyzePoses AnalyzePosesScr;
+    private AnalyzePosesUR5 AnalyzePosesScr;
     private List<double> poseScores;
     private int customGripperCount = 0;
+    
+    void Start()
+    {
+        FKscr = gameObject.GetComponent<ForwardKinematicsUR5>();
+        gripper = GameObject.Find("Gripper");
+        rend = gameObject.GetComponent<Renderer>();
+        AnalyzePosesScr = gameObject.GetComponent<AnalyzePosesUR5>();
+    }
 
-    // Add animation keyframes for robot arms
-    // Arms rotate around local y-axis
-    void AddAnim(string rPath, Transform arm, List<double> d, ref AnimationClip clip)
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    // Add animation in which arm rotates around x-axis
+    void AddAnimX(string rPath, Transform arm, List<double> d, ref AnimationClip clip)
+    {
+        AnimationCurve xCurve;
+        AnimationCurve yCurve;
+        AnimationCurve zCurve;
+
+        Keyframe[] xKeys = new Keyframe[n_data];
+        Keyframe[] yKeys = new Keyframe[n_data];
+        Keyframe[] zKeys = new Keyframe[n_data];
+
+        float keyMultiplier = 10f/n_data;
+        
+        for (int i=0; i<n_data; i++)
+        {
+            xKeys[i] = new Keyframe(i*keyMultiplier, (float)d[i]*180/Mathf.PI);
+            yKeys[i] = new Keyframe(i*keyMultiplier, arm.localEulerAngles.y);
+            zKeys[i] = new Keyframe(i*keyMultiplier, arm.localEulerAngles.z);
+        }
+
+        xCurve = new AnimationCurve(xKeys);
+        yCurve = new AnimationCurve(yKeys);
+        zCurve = new AnimationCurve(zKeys);
+        clip.SetCurve(rPath, typeof(Transform), "localEulerAngles.x", xCurve);
+        clip.SetCurve(rPath, typeof(Transform), "localEulerAngles.y", yCurve);
+        clip.SetCurve(rPath, typeof(Transform), "localEulerAngles.z", zCurve);
+    }
+
+    // Add animation in which arm rotates around y-axis
+    void AddAnimY(string rPath, Transform arm, List<double> d, ref AnimationClip clip)
     {
         AnimationCurve xCurve;
         AnimationCurve yCurve;
@@ -101,39 +129,9 @@ public class RobotControllerScript : MonoBehaviour
         clip.SetCurve(rPath, typeof(Transform), "localEulerAngles.z", zCurve);
     }
 
-    // Add animation keyframes for robot base
-    // This is different from arms as base rotates around local z-axis
-    void AddAnimBase(string rPath, Transform arm, List<double> d, ref AnimationClip clip)
-    {
-        AnimationCurve xCurve;
-        AnimationCurve yCurve;
-        AnimationCurve zCurve;
-
-        Keyframe[] xKeys = new Keyframe[n_data];
-        Keyframe[] yKeys = new Keyframe[n_data];
-        Keyframe[] zKeys = new Keyframe[n_data];
-        
-        float keyMultiplier = 10f/n_data;
-        
-        for (int i=0; i<n_data; i++)
-        {
-            xKeys[i] = new Keyframe((float)i*keyMultiplier, arm.localEulerAngles.x);
-            yKeys[i] = new Keyframe((float)i*keyMultiplier, arm.localEulerAngles.y);
-            zKeys[i] = new Keyframe((float)i*keyMultiplier, (float)d[i]*180/Mathf.PI);
-        }
-
-        xCurve = new AnimationCurve(xKeys);
-        yCurve = new AnimationCurve(yKeys);
-        zCurve = new AnimationCurve(zKeys);
-        clip.SetCurve(rPath, typeof(Transform), "localEulerAngles.x", xCurve);
-        clip.SetCurve(rPath, typeof(Transform), "localEulerAngles.y", yCurve);
-        clip.SetCurve(rPath, typeof(Transform), "localEulerAngles.z", zCurve);
-    }
-
     public void CreateRobotAnimation()
     {
 		line = gameObject.GetComponent<LineRenderer>();
-
         endEffPos = new List<Vector3>();
         endEffRot = new List<Quaternion>();
 
@@ -143,16 +141,13 @@ public class RobotControllerScript : MonoBehaviour
         d3 = new List<double>();
         d4 = new List<double>();
         d5 = new List<double>();
-        d6 = new List<double>();
 
         anim = GetComponent<Animation>();
         clip = new AnimationClip();
         clip.legacy = true;
-        dabClip = new AnimationClip();
-        dabClip.legacy = true;
 
         
-		//Get each row from csv data file
+		////////////Get each row from csv data file
 		GameObject UIController = GameObject.Find("UI Controller");
 		StreamReader joint_data;
         StreamReader temp;
@@ -168,13 +163,12 @@ public class RobotControllerScript : MonoBehaviour
         
         string tempdata;
 
-        // Check if there are 7 joint angle value columns in the file
-        // If not then this file is not the joint angle file for the Sawyer robot
+        //Check if there are 6 joint angle value columns in the file
         tempdata = temp.ReadLine();
         string[] tempstr = tempdata.Split(new char[] {','} );
-        if(tempstr.Length != 7){
-            LogHandler.Logger.Log(gameObject.name + " - RobotControllerScript.cs: Not a joint data file with 7 joint data points for angles!", LogType.Error);
-			LogHandler.Logger.ShowMessage("Not a joint data file with 7 joint data points for angles!", "Error!");
+        if(tempstr.Length != 6){
+            LogHandler.Logger.Log(gameObject.name + " - RobotControllerScript.cs: Not a joint data file with 6 joint data points for angles!", LogType.Error);
+			LogHandler.Logger.ShowMessage("Not a joint data file with 6 joint data points for angles!", "Error!");
             return;
         }
 
@@ -186,7 +180,7 @@ public class RobotControllerScript : MonoBehaviour
         }while(tempdata != null);
         n_data = i - 1;
 
-        // Read data from joint data file
+        //Read data from joint data file
 		string data;
 		data = joint_data.ReadLine();
         i = 0;
@@ -197,16 +191,15 @@ public class RobotControllerScript : MonoBehaviour
             // Add to the list containing joint angles for each arm
             // Negative sign indicates direction of rotation
             d0.Add(-double.Parse(jointData[0]));
-            d1.Add(-double.Parse(jointData[1]));
+            d1.Add(double.Parse(jointData[1]));
             d2.Add(double.Parse(jointData[2]));
-            d3.Add(-double.Parse(jointData[3]));
-            d4.Add(double.Parse(jointData[4]));
+            d3.Add(double.Parse(jointData[3]));
+            d4.Add(-double.Parse(jointData[4]));
             d5.Add(-double.Parse(jointData[5]));
-            d6.Add(double.Parse(jointData[6]));
 
             // Used for plotting end-effector path using forward kinematics
             // FKscr is the forward kinematics script associated with the forward kinematics skeleton
-            List<float> ang = new List<float>(){ (float)d0[i], (float)d1[i], (float)d2[i], (float)d3[i], (float)d4[i], (float)d5[i], (float)d6[i]};
+            List<float> ang = new List<float>(){ (float)d0[i], (float)d1[i], (float)d2[i], (float)d3[i], (float)d4[i], (float)d5[i]};
             FKscr.ModifyPos(ang);
 			line.SetPosition(line.positionCount++, FKscr.GetPoint());
             endEffPos.Add(FKscr.GetPoint());
@@ -218,53 +211,34 @@ public class RobotControllerScript : MonoBehaviour
 		}while(data != null);
 
         // Add animation using the joint angles read from the CSV file to each arm
-        AddAnimBase("base/L0", L0, d0, ref clip);
-        AddAnim("base/L0/L1", L1, d1, ref clip);
-        AddAnim("base/L0/L1/Body/L2", L2, d2, ref clip);
-        AddAnim("base/L0/L1/Body/L2/Body/L3", L3, d3, ref clip);
-        AddAnim("base/L0/L1/Body/L2/Body/L3/Body/L4", L4, d4, ref clip);
-        AddAnim("base/L0/L1/Body/L2/Body/L3/Body/L4/Body/L5", L5, d5, ref clip);
-        AddAnim("base/L0/L1/Body/L2/Body/L3/Body/L4/Body/L5/Body/L6", L6, d6, ref clip);
+        AddAnimY("world/base_link/shoulder_link", L0, d0, ref clip);
+        AddAnimX("world/base_link/shoulder_link/upper_arm_link", L1, d1, ref clip);
+        AddAnimX("world/base_link/shoulder_link/upper_arm_link/forearm_link", L2, d2, ref clip);
+        AddAnimX("world/base_link/shoulder_link/upper_arm_link/forearm_link/wrist_1_link", L3, d3, ref clip);
+        AddAnimY("world/base_link/shoulder_link/upper_arm_link/forearm_link/wrist_1_link/wrist_2_link", L4, d4, ref clip);
+        AddAnimX("world/base_link/shoulder_link/upper_arm_link/forearm_link/wrist_1_link/wrist_2_link/wrist_3_link", L5, d5, ref clip);
 
         anim.AddClip(clip, "regular");
     }
-
-    void Start(){
-        gripper = GameObject.Find("Gripper");
-        FKscr = gameObject.GetComponent<ForwardKinematics>();
-        rend = gameObject.GetComponent<Renderer>();
-        AnalyzePosesScr = gameObject.GetComponent<AnalyzePoses>();
-    }
-
-    void Update()
-    {
-
-        //Descriptor that displays what the robot is doing
-        try{
-            if(anim["regular"].normalizedTime > tSafeComplReplay2){
-                textDesc.text = "Safe Compliant replay 2";
-                if(rend.material != mat_normal) rend.material = mat_normal;
-                gripper.GetComponent<GripperScript>().Open();
-            }
-            else if(anim["regular"].normalizedTime > tConstraint){
-                textDesc.text = "Interacting with constraint";
-                if(rend.material != mat_interact) rend.material = mat_interact;
-                gripper.GetComponent<GripperScript>().Close();
-            }
-            else if(anim["regular"].normalizedTime > tSafeComplReplay1){
-                textDesc.text = "Safe compliant replay 1";
-                if(rend.material != mat_normal) rend.material = mat_normal;
-                gripper.GetComponent<GripperScript>().Open();
-            }
-            else if(anim["regular"].normalizedTime > tSafeComplPos){
-                textDesc.text = "Safe compliant positioning";
-                if(rend.material != mat_normal) rend.material = mat_normal;
-            }
-            else textDesc.text = "Replay end";
-        }catch{}
-    }
-
+    
     //////////////////******Pose extraction******//////////////////////////////////////
+
+    // Get poses in a constant time interval
+    public void ConstantTimeIntPoses() {
+        
+        poseScores = AnalyzePosesScr.ExtractPoseTimeInt(endEffPos);
+
+        MakeGrippersForInt();
+    }
+
+    // Get poses in a constant distance interval
+    public void ConstantDistIntPoses() {
+        
+        poseScores = AnalyzePosesScr.ExtractPoseDistInt(endEffPos);
+
+        MakeGrippersForInt();
+    }
+
     public void ClearAll() {
 
         foreach (GameObject dg in dupGrippers)
@@ -274,24 +248,6 @@ public class RobotControllerScript : MonoBehaviour
         posePts.Clear();
         posePts.Add(line.GetPosition(0));
         customGripperCount = 0;
-    }
-
-    // Get poses in a constant time interval
-    public void ConstantTimeIntPoses() {
-        
-        poseScores = AnalyzePosesScr.ExtractPoseTimeInt(endEffPos);
-
-        //gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
-        MakeGrippersForInt();
-    }
-
-    // Get poses in a constant distance interval
-    public void ConstantDistIntPoses() {
-        
-        poseScores = AnalyzePosesScr.ExtractPoseDistInt(endEffPos);
-
-        //gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
-        MakeGrippersForInt();
     }
     
     // Funtion to start pose selection algorithm
@@ -309,13 +265,12 @@ public class RobotControllerScript : MonoBehaviour
             poseScores[i] = Func.Median(tempScores, i-hSize, i+hSize);
         }
 
-        //gameObject.GetComponent<GraphScript>().ShowGraph(poseScores);
         MakeGrippers();
     }
     
     // Duplicate the gripper position for custom pose selection
     public void DuplicateGripper(){
-        GameObject dGrip = Instantiate(gripperCorrectedModel, gripper.transform.position, gripper.transform.rotation);
+        GameObject dGrip = Instantiate(gripperModel, gripper.transform.position, gripper.transform.rotation);
         dupGrippers.Add(dGrip);
         
         //Gripper Label Text
@@ -344,9 +299,8 @@ public class RobotControllerScript : MonoBehaviour
             if(flag == 1){
                 count++;
                 //Debug.Log((i/(float)poseScores.Count) + " : " + poseScores[i]);
-                GameObject dGrip = Instantiate(gripperModel, endEffPos[i], endEffRot[i]);
+                GameObject dGrip = Instantiate(gripperCorrectedModel, endEffPos[i], endEffRot[i]);
                 dupGrippers.Add(dGrip);
-                //gameObject.GetComponent<GraphScript>().PlotLine(i);
 
                 //Gripper Label Text
                 GameObject pText = Instantiate(positionText, dGrip.transform.position, Quaternion.identity);
@@ -363,7 +317,7 @@ public class RobotControllerScript : MonoBehaviour
     public void MakeGrippers(int[] idxs) {
         for(int i = 0; i < idxs.Length; ++i) {
             Debug.Log("Making gripper " + i + "; Pos idx = " + idxs[i]);
-            GameObject dGrip = Instantiate(gripperModel, endEffPos[idxs[i]], endEffRot[idxs[i]]);
+            GameObject dGrip = Instantiate(gripperCorrectedModel, endEffPos[idxs[i]], endEffRot[idxs[i]]);
             dupGrippers.Add(dGrip);
         }
     }
@@ -375,7 +329,7 @@ public class RobotControllerScript : MonoBehaviour
 
         for(int i = 0; i < poseScores.Count; i++) {
             if(poseScores[i] == 10) {
-                GameObject dGrip = Instantiate(gripperModel, endEffPos[i], endEffRot[i]);
+                GameObject dGrip = Instantiate(gripperCorrectedModel, endEffPos[i], endEffRot[i]);
                 dupGrippers.Add(dGrip);
                 
                 //Gripper Label Text
@@ -392,7 +346,7 @@ public class RobotControllerScript : MonoBehaviour
     }
 
     /////////////////************END*************//////////////////////////////////////
-
+    
 
     /////////////////************UI Buttons*************//////////////////////////////
     public void ReadForceFile(){
@@ -500,11 +454,9 @@ public class RobotControllerScript : MonoBehaviour
     public void ToggleRobot() {
         if (robotVisible) {
             transform.GetChild(0).gameObject.SetActive(false);
-            transform.GetChild(1).gameObject.SetActive(false);
             robotVisible = false;
         } else {
             transform.GetChild(0).gameObject.SetActive(true);
-            transform.GetChild(1).gameObject.SetActive(true);
             robotVisible = true;
         }
     }

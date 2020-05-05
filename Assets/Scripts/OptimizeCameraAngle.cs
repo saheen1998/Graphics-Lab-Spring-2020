@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -63,10 +63,9 @@ public class OptimizeCameraAngle : MonoBehaviour
                     // If view is occluded then skip the for loop
                     RaycastHit hit = new RaycastHit();
                     Vector3 dir = (points[i] - transform.position).normalized;
-                    if(Physics.Raycast(transform.position, dir, out hit, (float)Func.DistTo(transform.position, points[i])+0.05f))
-                        if(hit.collider.gameObject.name == "Sawyer RobotController"/*hit.transform.root.gameObject.Equals("Sawyer RobotController")*/) {
+                    if(Physics.Raycast(transform.position, dir, out hit, (float)Func.DistTo(transform.position, points[i])+0.05f)){
+                        //if(hit.collider.gameObject.name == "Sawyer RobotController"/*hit.transform.root.gameObject.Equals("Sawyer RobotController")*/) {
                             occludeMult = 0;
-                            //Debug.Log("Occluded");
                             Debug.DrawRay(transform.position, dir * hit.distance, Color.yellow);
                             break;
                         }

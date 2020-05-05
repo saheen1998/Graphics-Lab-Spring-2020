@@ -1,2 +1,4 @@
-2020/04/25 07:49:27 - Warning
+2020/05/05 04:48:32 - Warning
 	CamFree - CamConstraint.cs: Points not found!
+2020/05/05 04:48:37 - Error
+	UR5 Controller - RobotControllerScript.cs: Not a joint data file with 6 joint data points for angles!

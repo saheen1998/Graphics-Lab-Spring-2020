@@ -22,7 +22,7 @@ public class KmeansClustering : MonoBehaviour
         /*for(int i = 0; i < clustering.Length; ++i)
             Debug.Log(clustering[i]);*/
 
-        gameObject.GetComponent<GraphScript>().ShowGraph(rawData, clustering);
+        //gameObject.GetComponent<GraphScript>().ShowGraph(rawData, clustering);
 
         double[] shortestDists = new double[numClusters];
         //double[][] nearestPts = new double[clustering.Length][];

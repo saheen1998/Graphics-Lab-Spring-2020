@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Script for checking robot arm collision with table
+// NOT CURRENTLY USED
+// Use to implement collision checking with room objects
 public class ScriptCollision : MonoBehaviour
 {
     public GameObject collisionAlert;

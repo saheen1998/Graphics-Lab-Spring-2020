@@ -9,7 +9,7 @@ public class ForwardKinematicsUR5 : MonoBehaviour
     public void ModifyPos(List<float> ang) {
         arm[0].localRotation = Quaternion.Euler(0, ang[0] * Mathf.Rad2Deg, 0);
         arm[1].localRotation = Quaternion.Euler(ang[1] * Mathf.Rad2Deg, 0, 0);
-        arm[3].localRotation = Quaternion.Euler(-ang[2] * Mathf.Rad2Deg, 0, 0);
+        arm[3].localRotation = Quaternion.Euler(ang[2] * Mathf.Rad2Deg, 0, 0);
         arm[5].localRotation = Quaternion.Euler(ang[3] * Mathf.Rad2Deg, 0, 0);
         arm[6].localRotation = Quaternion.Euler(0, ang[4] * Mathf.Rad2Deg, 0);
     }

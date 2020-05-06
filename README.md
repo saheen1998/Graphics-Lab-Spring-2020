@@ -44,6 +44,7 @@
 4. Sudden change in rotation of the gripper may provide useful information. This can potentially be a new parameter.
 5. The pose selection fails when there is repeated motion; poses keep getting selected and poses get merged with each other. There could be a system that detects repeated motion and summarizes that motion into one pose describing that movement (possibly using an arrow to represent the motion).
 6. Poses in which there is occlusion or which merge together are selected, which is not ideal. The algorithm should only choose one gripper pose which does not collide or merge with other gripper poses.
+7. The current algorithm does not consider the arms of the robot themselves. It does not display what the arms were doing at the specific gripper positions. This can be a parameter that can be considered and displaying the robot arms is also another option.
 
 ### C. Camera optimization:
 1. Camera optimization in performed using a scoring method. Each camera view is scored by using a set of parameters that describe the view. The viewing angle with the highest score is then selected as this should, in theory, provide the best possible view of the motion.

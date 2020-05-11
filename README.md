@@ -33,7 +33,7 @@
 8. Implementation is optimized for the Sawyer robot. The UR5 model was implemented towards the end, hence there could be bugs in it.
 
 ### B. Pose selection algorithm:
-1. Pose selection is currently implemented using a scoring system that scores each end-effector(gripper) position.
+1. Pose selection is currently implemented using a scoring system that scores each end-effector(gripper) position. The poses with the best scores are then selected for displaying.
 2. The final scores have a lot of noise so they need to be smoothed. The smoothing is done using a sliding window median filter. After the noise is minimized, poses are selected using a sliding window that checks for local maximas inside that window. The local maximas are the desired gripper poses.
 3. The current scoring system looks at distances between consecutive frames (samples) in the CSV file for position (longer distances means gripper has moved further, good points of interest), check if the gripper is moving slow (gripper moving slow could mean robot is doing something interesting), check if there is a big change in the direction end-effector is moving (larger change could mark points of interest).
 4. There are two naive algorithms: select poses at a constant distance or time interval. The idea is that the new pose selection algorithm outputs a better summarized motion than these naive algorithms and is almost at par with the poses selcted by hand.
